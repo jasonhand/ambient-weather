@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Line } from 'react-chartjs-2';
-import { X } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -84,8 +83,8 @@ const WeatherDetailModal: React.FC<WeatherDetailModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] bg-slate-900/95 backdrop-blur-sm border-white/20 text-white overflow-hidden">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl h-[85vh] bg-slate-900/95 backdrop-blur-sm border-white/20 text-white flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center space-x-3 text-2xl">
             <div className={`p-3 bg-gradient-to-br ${gradient} rounded-lg`}>
               {icon}
@@ -98,7 +97,7 @@ const WeatherDetailModal: React.FC<WeatherDetailModalProps> = ({
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6 overflow-y-auto pr-2">
+        <div className="flex-1 space-y-6 overflow-y-auto pr-2">
           {/* Chart Section */}
           <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
             <h3 className="text-lg font-semibold mb-4 text-white">24-Hour Trend</h3>
@@ -130,13 +129,6 @@ const WeatherDetailModal: React.FC<WeatherDetailModalProps> = ({
             </div>
           </div>
         </div>
-        
-        <button
-          onClick={onClose}
-          className="absolute right-4 top-4 p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
       </DialogContent>
     </Dialog>
   );

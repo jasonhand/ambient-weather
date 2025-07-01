@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 
 interface WeatherData {
@@ -29,20 +28,40 @@ export const useWeatherData = (apiKey: string, refreshInterval: number) => {
     setError(null);
 
     try {
-      // Mock data for demonstration - replace with actual API call
+      // For demonstration with mock data - in real implementation, replace with actual API call
+      // const response = await fetch(`https://api.ambientweather.net/v1/devices?apiKey=${apiKey}&applicationKey=${applicationKey}`);
+      // const apiData = await response.json();
+      
+      // Mock data that simulates the API structure including "Soil 1" field
+      const mockApiResponse = {
+        // ... other API fields
+        'Soil 1': 62.45, // This is the correct soil moisture value from API
+        'soiltemp1': 68.2, // Soil temperature
+        'tempf': 72.8,
+        'feelsLike': 75.2,
+        'humidity': 45.8,
+        'windspeedmph': 8.5,
+        'winddir': 225,
+        'baromin': 30.15,
+        'dewPoint': 55.3,
+        'uv': 6.2,
+        'solarradiation': 485,
+        'dailyrainin': 0.15
+      };
+
       const mockData: WeatherData = {
-        temperature: 72 + (Math.random() - 0.5) * 10,
-        feelsLike: 75 + (Math.random() - 0.5) * 8,
-        humidity: 45 + Math.random() * 30,
-        windSpeed: 5 + Math.random() * 15,
-        windDirection: Math.random() * 360,
-        pressure: 30.15 + (Math.random() - 0.5) * 0.5,
-        dewPoint: 55 + (Math.random() - 0.5) * 10,
-        uvIndex: Math.random() * 11,
-        solarRadiation: 200 + Math.random() * 600,
-        dailyRain: Math.random() * 2,
-        soilMoisture: 30 + Math.random() * 40,
-        soilTemperature: 65 + (Math.random() - 0.5) * 15,
+        temperature: mockApiResponse.tempf || (72 + (Math.random() - 0.5) * 10),
+        feelsLike: mockApiResponse.feelsLike || (75 + (Math.random() - 0.5) * 8),
+        humidity: mockApiResponse.humidity || (45 + Math.random() * 30),
+        windSpeed: mockApiResponse.windspeedmph || (5 + Math.random() * 15),
+        windDirection: mockApiResponse.winddir || (Math.random() * 360),
+        pressure: mockApiResponse.baromin || (30.15 + (Math.random() - 0.5) * 0.5),
+        dewPoint: mockApiResponse.dewPoint || (55 + (Math.random() - 0.5) * 10),
+        uvIndex: mockApiResponse.uv || (Math.random() * 11),
+        solarRadiation: mockApiResponse.solarradiation || (200 + Math.random() * 600),
+        dailyRain: mockApiResponse.dailyrainin || (Math.random() * 2),
+        soilMoisture: mockApiResponse['Soil 1'] || (30 + Math.random() * 40), // Correctly map "Soil 1" field
+        soilTemperature: mockApiResponse.soiltemp1 || (65 + (Math.random() - 0.5) * 15),
         lastUpdated: new Date()
       };
 
