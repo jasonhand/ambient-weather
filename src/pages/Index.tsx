@@ -48,6 +48,8 @@ const Index = () => {
             onRefresh={refetch}
             loading={loading}
             lastUpdated={weatherData?.lastUpdated}
+            location={weatherData?.location}
+            isRealData={weatherData?.isRealData}
           />
           
           {weatherData && (

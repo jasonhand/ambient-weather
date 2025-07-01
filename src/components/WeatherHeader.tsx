@@ -1,19 +1,29 @@
 
 import React from 'react';
-import { Settings, RefreshCw, Cloud } from 'lucide-react';
+import { Settings, RefreshCw, Cloud, MapPin, AlertTriangle } from 'lucide-react';
 
 interface WeatherHeaderProps {
   onSettingsClick: () => void;
   onRefresh: () => void;
   loading: boolean;
   lastUpdated?: Date;
+  location?: {
+    name: string;
+    coords?: {
+      lat: number;
+      lon: number;
+    };
+  };
+  isRealData?: boolean;
 }
 
 const WeatherHeader: React.FC<WeatherHeaderProps> = ({
   onSettingsClick,
   onRefresh,
   loading,
-  lastUpdated
+  lastUpdated,
+  location,
+  isRealData = false
 }) => {
   const formatLastUpdated = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
@@ -32,11 +42,30 @@ const WeatherHeader: React.FC<WeatherHeaderProps> = ({
           </div>
           <div>
             <h1 className="text-3xl font-bold text-white">Weather Dashboard</h1>
-            {lastUpdated && (
-              <p className="text-gray-300 text-sm">
-                Last updated: {formatLastUpdated(lastUpdated)}
-              </p>
+            {location && (
+              <div className="flex items-center space-x-2 text-gray-300 text-sm">
+                <MapPin className="w-4 h-4" />
+                <span>{location.name}</span>
+                {location.coords && (
+                  <span className="text-gray-400">
+                    ({location.coords.lat.toFixed(4)}, {location.coords.lon.toFixed(4)})
+                  </span>
+                )}
+              </div>
             )}
+            <div className="flex items-center space-x-4 mt-1">
+              {lastUpdated && (
+                <p className="text-gray-300 text-sm">
+                  Last updated: {formatLastUpdated(lastUpdated)}
+                </p>
+              )}
+              {!isRealData && (
+                <div className="flex items-center space-x-1 text-orange-400 text-xs">
+                  <AlertTriangle className="w-3 h-3" />
+                  <span>MOCK DATA - Not using real AWN API</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

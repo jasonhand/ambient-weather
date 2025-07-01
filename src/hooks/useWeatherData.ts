@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 
 interface WeatherData {
@@ -14,6 +15,14 @@ interface WeatherData {
   soilMoisture: number;
   soilTemperature: number;
   lastUpdated: Date;
+  location?: {
+    name: string;
+    coords?: {
+      lat: number;
+      lon: number;
+    };
+  };
+  isRealData: boolean;
 }
 
 export const useWeatherData = (apiKey: string, refreshInterval: number) => {
@@ -46,7 +55,15 @@ export const useWeatherData = (apiKey: string, refreshInterval: number) => {
         'dewPoint': 55.3,
         'uv': 6.2,
         'solarradiation': 485,
-        'dailyrainin': 0.15
+        'dailyrainin': 0.15,
+        'info': {
+          'name': 'Demo Weather Station',
+          'location': 'San Francisco, CA',
+          'coords': {
+            'lat': 37.7749,
+            'lon': -122.4194
+          }
+        }
       };
 
       const mockData: WeatherData = {
@@ -62,12 +79,18 @@ export const useWeatherData = (apiKey: string, refreshInterval: number) => {
         dailyRain: mockApiResponse.dailyrainin || (Math.random() * 2),
         soilMoisture: mockApiResponse['Soil 1'] || (30 + Math.random() * 40), // Correctly map "Soil 1" field
         soilTemperature: mockApiResponse.soiltemp1 || (65 + (Math.random() - 0.5) * 15),
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
+        location: {
+          name: mockApiResponse.info?.name || 'Demo Weather Station',
+          coords: mockApiResponse.info?.coords
+        },
+        isRealData: false // This clearly indicates we're using mock data
       };
 
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      console.log('Using MOCK data - not real AWN API data:', mockData);
       setData(mockData);
     } catch (err) {
       setError('Failed to fetch weather data. Please check your API keys and try again.');
