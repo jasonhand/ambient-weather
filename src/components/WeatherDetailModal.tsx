@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Line } from 'react-chartjs-2';
+import { datadog } from '../utils/datadog';
 import {
   Dialog,
   DialogContent,
@@ -24,7 +25,19 @@ interface WeatherDetailModalProps {
   subtitle: string;
   chartData: {
     labels: string[];
-    datasets: any[];
+    datasets: {
+      label?: string;
+      data: number[];
+      borderColor: string;
+      backgroundColor: string;
+      fill: boolean;
+      tension: number;
+      pointBackgroundColor: string;
+      pointBorderColor: string;
+      pointBorderWidth: number;
+      pointRadius: number;
+      pointHoverRadius: number;
+    }[];
   };
   icon: React.ReactNode;
   gradient: string;
@@ -40,6 +53,10 @@ const WeatherDetailModal: React.FC<WeatherDetailModalProps> = ({
   icon,
   gradient
 }) => {
+  const handleClose = () => {
+    datadog.trackModalInteraction('close', title.toLowerCase().replace(/\s+/g, '_'));
+    onClose();
+  };
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -82,7 +99,7 @@ const WeatherDetailModal: React.FC<WeatherDetailModalProps> = ({
   }));
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl h-[85vh] bg-slate-900/95 backdrop-blur-sm border-white/20 text-white flex flex-col">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center space-x-3 text-2xl">

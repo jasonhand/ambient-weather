@@ -11,7 +11,18 @@ interface WeatherCardProps {
   subtitleClass?: string;
   chartData?: {
     labels: string[];
-    datasets: any[];
+    datasets: {
+      data: number[];
+      borderColor: string;
+      backgroundColor: string;
+      fill: boolean;
+      tension: number;
+      pointBackgroundColor: string;
+      pointBorderColor: string;
+      pointBorderWidth: number;
+      pointRadius: number;
+      pointHoverRadius: number;
+    }[];
   };
   onClick?: () => void;
 }
@@ -46,7 +57,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
 
   return (
     <div 
-      className="group relative overflow-hidden cursor-pointer"
+      className="relative overflow-hidden cursor-pointer"
       onClick={onClick}
     >
       <div className="absolute inset-0 bg-gradient-to-br opacity-20 group-hover:opacity-30 transition-opacity duration-300 rounded-2xl" 

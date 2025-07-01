@@ -1,5 +1,6 @@
-
 import { useState, useEffect, useCallback } from 'react';
+import { storeHistoricalData, HistoricalDataPoint, cleanupHistoricalData } from '../utils/storage';
+import { datadog } from '../utils/datadog';
 
 interface WeatherData {
   temperature: number;
@@ -18,95 +19,202 @@ interface WeatherData {
   location?: {
     name: string;
     coords?: {
-      lat: number;
-      lon: number;
+      lat?: number;
+      lon?: number;
     };
   };
   isRealData: boolean;
 }
 
-export const useWeatherData = (apiKey: string, refreshInterval: number) => {
+// Ambient Weather Network API response interface
+interface AmbientWeatherDevice {
+  info?: {
+    name?: string;
+    location?: string;
+    coords?: {
+      lat?: number;
+      lon?: number;
+    };
+  };
+  lastData?: {
+    dateutc?: number;
+    tempf?: number;
+    feelsLike?: number;
+    humidity?: number;
+    windspeedmph?: number;
+    winddir?: number;
+    baromin?: number;
+    dewPoint?: number;
+    uv?: number;
+    solarradiation?: number;
+    dailyrainin?: number;
+    // Soil moisture fields - API might use different names
+    soilhum1?: number;
+    'Soil 1'?: number;
+    soil1?: number;
+    soilmoisture1?: number;
+    soil_moisture_1?: number;
+    // Soil temperature fields
+    soiltemp1?: number;
+    soil_temp_1?: number;
+    [key: string]: number | undefined; // Allow for any additional numeric fields
+  };
+}
+
+export const useWeatherData = (combinedApiKey: string, refreshInterval: number) => {
   const [data, setData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchWeatherData = useCallback(async () => {
-    if (!apiKey) return;
+    if (!combinedApiKey) return;
 
+    // Parse the combined API key (format: "apiKey:applicationKey")
+    const [apiKey, applicationKey] = combinedApiKey.split(':');
+    
+    if (!apiKey || !applicationKey) {
+      setError('Invalid API key format. Please provide both API key and application key.');
+      return;
+    }
+
+    console.log(`Fetching weather data at ${new Date().toLocaleTimeString()} (interval: ${refreshInterval / 1000}s)`);
     setLoading(true);
     setError(null);
 
+    const startTime = Date.now();
     try {
-      // For demonstration with mock data - in real implementation, replace with actual API call
-      // const response = await fetch(`https://api.ambientweather.net/v1/devices?apiKey=${apiKey}&applicationKey=${applicationKey}`);
-      // const apiData = await response.json();
+      // Make actual API call to Ambient Weather Network
+      const response = await fetch(`https://api.ambientweather.net/v1/devices?apiKey=${apiKey}&applicationKey=${applicationKey}`);
       
-      // Mock data that simulates the API structure including "Soil 1" field
-      const mockApiResponse = {
-        // ... other API fields
-        'Soil 1': 62.45, // This is the correct soil moisture value from API
-        'soiltemp1': 68.2, // Soil temperature
-        'tempf': 72.8,
-        'feelsLike': 75.2,
-        'humidity': 45.8,
-        'windspeedmph': 8.5,
-        'winddir': 225,
-        'baromin': 30.15,
-        'dewPoint': 55.3,
-        'uv': 6.2,
-        'solarradiation': 485,
-        'dailyrainin': 0.15,
-        'info': {
-          'name': 'Demo Weather Station',
-          'location': 'San Francisco, CA',
-          'coords': {
-            'lat': 37.7749,
-            'lon': -122.4194
+      const duration = Date.now() - startTime;
+      datadog.trackApiCall(
+        'https://api.ambientweather.net/v1/devices',
+        'GET',
+        response.status,
+        duration
+      );
+      
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
+      }
+      
+      const apiData: AmbientWeatherDevice[] = await response.json();
+      
+      console.log('Raw API response:', JSON.stringify(apiData, null, 2));
+      
+      if (!apiData || apiData.length === 0) {
+        throw new Error('No weather devices found. Please check your API keys and device configuration.');
+      }
+
+      // Use the first device's data
+      const device = apiData[0];
+      const lastData = device.lastData || {};
+      const info = device.info || {};
+      
+            console.log('Device info:', info);
+      console.log('Last data fields:', Object.keys(lastData));
+      console.log('Last data values:', lastData);
+
+      // Convert timestamp to Date
+      const lastUpdated = new Date(lastData.dateutc || Date.now());
+
+      // Helper function to find soil moisture value from various possible field names
+      const getSoilMoisture = (data: Record<string, number | undefined>): number => {
+        const possibleFields = ['soilhum1', 'Soil 1', 'soil1', 'soilmoisture1', 'soil_moisture_1'];
+        for (const field of possibleFields) {
+          if (data[field] !== undefined && data[field] !== null) {
+            console.log(`Found soil moisture in field '${field}':`, data[field]);
+            return data[field];
           }
         }
+        console.log('No soil moisture field found in API response');
+        return 0;
       };
 
-      const mockData: WeatherData = {
-        temperature: mockApiResponse.tempf || (72 + (Math.random() - 0.5) * 10),
-        feelsLike: mockApiResponse.feelsLike || (75 + (Math.random() - 0.5) * 8),
-        humidity: mockApiResponse.humidity || (45 + Math.random() * 30),
-        windSpeed: mockApiResponse.windspeedmph || (5 + Math.random() * 15),
-        windDirection: mockApiResponse.winddir || (Math.random() * 360),
-        pressure: mockApiResponse.baromin || (30.15 + (Math.random() - 0.5) * 0.5),
-        dewPoint: mockApiResponse.dewPoint || (55 + (Math.random() - 0.5) * 10),
-        uvIndex: mockApiResponse.uv || (Math.random() * 11),
-        solarRadiation: mockApiResponse.solarradiation || (200 + Math.random() * 600),
-        dailyRain: mockApiResponse.dailyrainin || (Math.random() * 2),
-        soilMoisture: mockApiResponse['Soil 1'] || (30 + Math.random() * 40), // Correctly map "Soil 1" field
-        soilTemperature: mockApiResponse.soiltemp1 || (65 + (Math.random() - 0.5) * 15),
-        lastUpdated: new Date(),
+      // Helper function to find soil temperature value from various possible field names
+      const getSoilTemperature = (data: Record<string, number | undefined>): number => {
+        const possibleFields = ['soiltemp1', 'soil_temp_1'];
+        for (const field of possibleFields) {
+          if (data[field] !== undefined && data[field] !== null) {
+            console.log(`Found soil temperature in field '${field}':`, data[field]);
+            return data[field];
+          }
+        }
+        console.log('No soil temperature field found in API response');
+        return 0;
+      };
+
+      const weatherData: WeatherData = {
+        temperature: lastData.tempf || 0,
+        feelsLike: lastData.feelsLike || lastData.tempf || 0,
+        humidity: lastData.humidity || 0,
+        windSpeed: lastData.windspeedmph || 0,
+        windDirection: lastData.winddir || 0,
+        pressure: lastData.baromin || 0,
+        dewPoint: lastData.dewPoint || 0,
+        uvIndex: lastData.uv || 0,
+        solarRadiation: lastData.solarradiation || 0,
+        dailyRain: lastData.dailyrainin || 0,
+        soilMoisture: getSoilMoisture(lastData),
+        soilTemperature: getSoilTemperature(lastData),
+        lastUpdated,
         location: {
-          name: mockApiResponse.info?.name || 'Demo Weather Station',
-          coords: mockApiResponse.info?.coords
+          name: info.name || 'Weather Station',
+          coords: info.coords
         },
-        isRealData: false // This clearly indicates we're using mock data
+        isRealData: true
       };
-
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      console.log('Using MOCK data - not real AWN API data:', mockData);
-      setData(mockData);
+      console.log('Real AWN API data received:', weatherData);
+      setData(weatherData);
+      
+      // Track successful weather data update
+      datadog.trackWeatherUpdate('api', true);
+      
+      // Store this data point in historical data
+      const historicalPoint: HistoricalDataPoint = {
+        timestamp: lastUpdated.getTime(),
+        temperature: weatherData.temperature,
+        feelsLike: weatherData.feelsLike,
+        humidity: weatherData.humidity,
+        windSpeed: weatherData.windSpeed,
+        windDirection: weatherData.windDirection,
+        pressure: weatherData.pressure,
+        dewPoint: weatherData.dewPoint,
+        uvIndex: weatherData.uvIndex,
+        solarRadiation: weatherData.solarRadiation,
+        dailyRain: weatherData.dailyRain,
+        soilMoisture: weatherData.soilMoisture,
+        soilTemperature: weatherData.soilTemperature,
+      };
+      storeHistoricalData(historicalPoint);
     } catch (err) {
-      setError('Failed to fetch weather data. Please check your API keys and try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch weather data. Please check your API keys and try again.';
+      setError(errorMessage);
       console.error('Weather API error:', err);
+      
+      // Track failed weather data update
+      datadog.trackWeatherUpdate('api', false, errorMessage);
+      
+      // Track error in Datadog
+      if (err instanceof Error) {
+        datadog.addError(err, { context: 'weather_api_fetch' });
+      }
     } finally {
       setLoading(false);
     }
-  }, [apiKey]);
+  }, [combinedApiKey]);
 
   useEffect(() => {
-    if (apiKey) {
+    if (combinedApiKey) {
+      // Clean up any existing duplicate data on first load
+      cleanupHistoricalData();
+      
       fetchWeatherData();
       const interval = setInterval(fetchWeatherData, refreshInterval);
       return () => clearInterval(interval);
     }
-  }, [apiKey, refreshInterval, fetchWeatherData]);
+  }, [combinedApiKey, refreshInterval, fetchWeatherData]);
 
   return {
     data,

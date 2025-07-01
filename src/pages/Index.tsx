@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Database } from 'lucide-react';
+import { datadog } from '../utils/datadog';
 import WeatherHeader from '../components/WeatherHeader';
 import WeatherStats from '../components/WeatherStats';
 import WeatherCharts from '../components/WeatherCharts';
@@ -25,6 +26,9 @@ const Index = () => {
     } else {
       setShowApiModal(true);
     }
+    
+    // Track page view
+    datadog.addAction('page_view', { page: 'index' });
   }, []);
 
   const handleApiKeySubmit = (key: string) => {

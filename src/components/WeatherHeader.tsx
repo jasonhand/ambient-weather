@@ -10,8 +10,8 @@ interface WeatherHeaderProps {
   location?: {
     name: string;
     coords?: {
-      lat: number;
-      lon: number;
+      lat?: number;
+      lon?: number;
     };
   };
   isRealData?: boolean;
@@ -46,7 +46,7 @@ const WeatherHeader: React.FC<WeatherHeaderProps> = ({
               <div className="flex items-center space-x-2 text-gray-300 text-sm">
                 <MapPin className="w-4 h-4" />
                 <span>{location.name}</span>
-                {location.coords && (
+                {location.coords && location.coords.lat !== undefined && location.coords.lon !== undefined && (
                   <span className="text-gray-400">
                     ({location.coords.lat.toFixed(4)}, {location.coords.lon.toFixed(4)})
                   </span>

@@ -8,16 +8,25 @@ import Index from "./pages/Index";
 import DataView from "./pages/DataView";
 import NotFound from "./pages/NotFound";
 import { useLocation } from "react-router-dom";
+import { datadog } from "./utils/datadog";
 
 const queryClient = new QueryClient();
 
 const DataViewWrapper = () => {
   const location = useLocation();
   const data = location.state?.data || null;
+  
+  // Track page view
+  datadog.addAction('page_view', { page: 'data_view' });
+  
   return <DataView data={data} />;
 };
 
-const App = () => (
+const App = () => {
+  // Track app initialization
+  datadog.addAction('app_initialized', { version: '1.0.0' });
+  
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -32,6 +41,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

@@ -1,6 +1,8 @@
 
 import React from 'react';
-import { X, Key, RefreshCw } from 'lucide-react';
+import { X, Key, RefreshCw, Grid3X3 } from 'lucide-react';
+import { resetCardOrder } from '../utils/cardOrder';
+import { datadog } from '../utils/datadog';
 
 interface WeatherSettingsProps {
   isOpen: boolean;
@@ -69,6 +71,24 @@ const WeatherSettings: React.FC<WeatherSettingsProps> = ({
               className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-lg font-semibold transition-all"
             >
               Update API Keys
+            </button>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-3">
+              <Grid3X3 className="w-4 h-4 inline mr-2" />
+              Layout Configuration
+            </label>
+            <button
+              onClick={() => {
+                resetCardOrder();
+                datadog.trackUserInteraction('card_order_reset', 'weather_settings');
+                // Force a page reload to apply the reset
+                window.location.reload();
+              }}
+              className="w-full px-4 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-lg font-semibold transition-all"
+            >
+              Reset Card Order
             </button>
           </div>
         </div>

@@ -103,3 +103,10 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Drag and drop styles */
+@layer components {
+  .dragging {
+    @apply transform rotate-2 shadow-2xl;
+  }
+}

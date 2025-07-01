@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { X, Key, ExternalLink } from 'lucide-react';
 import { storeApiKey } from '../utils/storage';
+import { datadog } from '../utils/datadog';
 
 interface ApiKeyModalProps {
   isOpen: boolean;
@@ -23,6 +24,9 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onSubmit }) 
       onSubmit(combinedKey);
       setApiKey('');
       setApplicationKey('');
+      
+      // Track API key configuration
+      datadog.trackUserInteraction('api_key_configured', 'api_key_modal', 'success');
     }
   };
 
