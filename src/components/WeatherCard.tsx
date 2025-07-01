@@ -13,6 +13,7 @@ interface WeatherCardProps {
     labels: string[];
     datasets: any[];
   };
+  onClick?: () => void;
 }
 
 const WeatherCard: React.FC<WeatherCardProps> = ({
@@ -22,7 +23,8 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
   icon,
   gradient,
   subtitleClass = 'text-gray-300',
-  chartData
+  chartData,
+  onClick
 }) => {
   const chartOptions = {
     responsive: true,
@@ -43,7 +45,10 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
   };
 
   return (
-    <div className="group relative overflow-hidden">
+    <div 
+      className="group relative overflow-hidden cursor-pointer"
+      onClick={onClick}
+    >
       <div className="absolute inset-0 bg-gradient-to-br opacity-20 group-hover:opacity-30 transition-opacity duration-300 rounded-2xl" 
            style={{ background: `linear-gradient(135deg, var(--tw-gradient-stops))` }}></div>
       
