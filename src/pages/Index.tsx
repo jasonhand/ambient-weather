@@ -1,5 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Database } from 'lucide-react';
 import WeatherHeader from '../components/WeatherHeader';
 import WeatherStats from '../components/WeatherStats';
 import WeatherCharts from '../components/WeatherCharts';
@@ -40,12 +42,25 @@ const Index = () => {
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-8">
-        <WeatherHeader 
-          onSettingsClick={() => setShowSettings(true)}
-          onRefresh={refetch}
-          loading={loading}
-          lastUpdated={weatherData?.lastUpdated}
-        />
+        <div className="flex items-center justify-between mb-8">
+          <WeatherHeader 
+            onSettingsClick={() => setShowSettings(true)}
+            onRefresh={refetch}
+            loading={loading}
+            lastUpdated={weatherData?.lastUpdated}
+          />
+          
+          {weatherData && (
+            <Link
+              to="/data"
+              state={{ data: weatherData }}
+              className="flex items-center space-x-2 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-xl text-white transition-all hover:scale-105"
+            >
+              <Database className="w-5 h-5" />
+              <span className="hidden sm:inline">Raw Data</span>
+            </Link>
+          )}
+        </div>
 
         {error && (
           <div className="mb-8 p-6 bg-red-500/20 backdrop-blur-sm border border-red-500/30 rounded-2xl text-red-100">

@@ -12,6 +12,8 @@ interface WeatherData {
   uvIndex: number;
   solarRadiation: number;
   dailyRain: number;
+  soilMoisture: number;
+  soilTemperature: number;
   lastUpdated: Date;
 }
 
@@ -28,9 +30,6 @@ export const useWeatherData = (apiKey: string, refreshInterval: number) => {
 
     try {
       // Mock data for demonstration - replace with actual API call
-      // const response = await fetch(`https://api.ambientweather.net/v1/devices?apiKey=${apiKey}&applicationKey=${appKey}`);
-      
-      // For demo purposes, generating realistic mock data
       const mockData: WeatherData = {
         temperature: 72 + (Math.random() - 0.5) * 10,
         feelsLike: 75 + (Math.random() - 0.5) * 8,
@@ -42,6 +41,8 @@ export const useWeatherData = (apiKey: string, refreshInterval: number) => {
         uvIndex: Math.random() * 11,
         solarRadiation: 200 + Math.random() * 600,
         dailyRain: Math.random() * 2,
+        soilMoisture: 30 + Math.random() * 40,
+        soilTemperature: 65 + (Math.random() - 0.5) * 15,
         lastUpdated: new Date()
       };
 
