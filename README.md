@@ -1,73 +1,52 @@
-# Welcome to your Lovable project
+# Ambient Weather Dashboard
+
+A beautiful, real-time weather dashboard that connects to Ambient Weather Network API to display weather data from your personal weather station.
+
+## Features
+
+- 🌤️ Real-time weather data from Ambient Weather Network
+- 📊 Interactive charts and statistics
+- 🎨 Beautiful, responsive UI with dark theme
+- 📱 Mobile-friendly design
+- 🔄 Configurable refresh intervals
+- 📈 Historical data tracking
+- 🎯 Datadog metrics integration
+
+## 📊 Datadog Integration
+
+This app includes optional Datadog metrics integration that allows you to send weather data to Datadog for monitoring and visualization.
+
+### Setup
+
+1. Go to Settings → Configure Datadog Metrics
+2. Enable the integration
+3. Enter your Datadog API Key and Application Key
+4. Optionally set a custom host name
+5. Save settings
+
+### What data is sent?
+
+When enabled, the app will send the following metrics to Datadog:
+- Temperature (Fahrenheit)
+- Feels like temperature
+- Humidity percentage
+- Wind speed (MPH)
+- Wind direction (degrees)
+- Barometric pressure (inHg)
+- Dew point (Fahrenheit)
+- UV index
+- Solar radiation (W/m²)
+- Daily rainfall (inches)
+- Soil moisture percentage
+- Soil temperature (Fahrenheit)
+
+All metrics include location tags and timestamps for easy filtering and analysis in Datadog.
+
+### Monitoring
+
+Get free monitoring for this project with [Datadog](https://www.datadoghq.com/dg/monitor/free-trial-b/?utm_source=jhand_demo)
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/67fdc73e-6999-4941-908e-b1b1871d8fd0
+**URL**: https://ambient-weather.lovable.app/
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/67fdc73e-6999-4941-908e-b1b1871d8fd0) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/67fdc73e-6999-4941-908e-b1b1871d8fd0) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)

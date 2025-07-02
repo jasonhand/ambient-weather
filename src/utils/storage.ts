@@ -1,5 +1,6 @@
 const API_KEY_STORAGE = 'ambient_weather_api_key';
 const HISTORICAL_DATA_STORAGE = 'ambient_weather_historical_data';
+const DATADOG_SETTINGS_STORAGE = 'ambient_weather_datadog_settings';
 const MAX_HISTORICAL_POINTS = 288; // 24 hours worth of 5-minute intervals
 
 export const storeApiKey = (apiKey: string): void => {
@@ -119,5 +120,39 @@ export const cleanupHistoricalData = (): void => {
     }
   } catch (error) {
     console.error('Failed to cleanup historical data:', error);
+  }
+};
+
+// Datadog settings storage functions
+export interface DatadogSettings {
+  enabled: boolean;
+  apiKey: string;
+  appKey: string;
+  host: string;
+}
+
+export const storeDatadogSettings = (settings: DatadogSettings): void => {
+  try {
+    localStorage.setItem(DATADOG_SETTINGS_STORAGE, JSON.stringify(settings));
+  } catch (error) {
+    console.error('Failed to store Datadog settings:', error);
+  }
+};
+
+export const getStoredDatadogSettings = (): DatadogSettings | null => {
+  try {
+    const data = localStorage.getItem(DATADOG_SETTINGS_STORAGE);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error('Failed to retrieve Datadog settings:', error);
+    return null;
+  }
+};
+
+export const removeDatadogSettings = (): void => {
+  try {
+    localStorage.removeItem(DATADOG_SETTINGS_STORAGE);
+  } catch (error) {
+    console.error('Failed to remove Datadog settings:', error);
   }
 };

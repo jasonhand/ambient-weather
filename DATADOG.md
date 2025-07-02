@@ -1,114 +1,134 @@
-# Datadog RUM Instrumentation
+# Datadog Integration Guide
 
-This weather dashboard has been instrumented with Datadog Real User Monitoring (RUM) to track user interactions, performance metrics, and application errors.
+This document explains how to use the Datadog metrics integration in the Ambient Weather Dashboard.
 
-## Configuration
+## Overview
 
-The Datadog RUM SDK is loaded in `index.html` with the following configuration:
+The Datadog integration allows you to send weather data from your Ambient Weather Network station to Datadog for monitoring, alerting, and visualization. This feature is optional and only sends data while the web app is running.
 
-- **Client Token**: `pube9baef23d6715258f73ebf2af8e8302a`
-- **Application ID**: `c03b4df7-6481-42ec-a4ef-44099b68ba26`
-- **Service**: `ambient-weather-dashboard`
-- **Environment**: `prod`
-- **Session Sample Rate**: 100%
-- **Session Replay Sample Rate**: 100%
-- **Privacy Level**: `mask-user-input`
+## Setup Instructions
 
-## Tracked Events
+### 1. Get Datadog API Keys
 
-### Page Views
-- `page_view` - Tracks when users visit different pages
-  - `index` - Main dashboard page
-  - `data_view` - Raw data page
+1. Sign up for a [Datadog account](https://www.datadoghq.com/) (free trial available)
+2. Go to **Organization Settings** → **API Keys**
+3. Create a new API key
+4. Go to **Organization Settings** → **Application Keys**
+5. Create a new Application key
 
-### Application Events
-- `app_initialized` - Tracks when the application starts
-- `api_key_configured` - Tracks when users set up their API keys
+### 2. Configure the Integration
 
-### API Calls
-- `api_call` - Tracks all API requests to Ambient Weather Network
-  - Includes URL, method, status code, and response time
-- `weather_data_update` - Tracks weather data fetch attempts
-  - Includes data source (api/mock), success status, and error messages
+1. Open the Weather Dashboard
+2. Click the **Settings** icon (gear) in the top-right corner
+3. Click **"Configure Datadog Metrics"**
+4. Toggle **"Enable Datadog Metrics"** to ON
+5. Enter your Datadog **API Key**
+6. Enter your Datadog **Application Key**
+7. Optionally set a custom **Host Name** (default: "weather-app")
+8. Click **"Save Settings"**
 
-### User Interactions
-- `user_interaction` - Tracks various user actions
-  - API key configuration
-  - Settings changes
-  - Data refreshes
+### 3. Verify Integration
 
-### Chart Interactions
-- `chart_interaction` - Tracks when users switch between different weather metrics
-  - Chart type and selected metric
+Once enabled, you'll see:
+- A green "Datadog Metrics Active" banner above the weather cards
+- A small "Datadog: X min" indicator in the header showing the refresh frequency
+- The last send time displayed in the banner
 
-### Modal Interactions
-- `modal_interaction` - Tracks when users open/close detail modals
-  - Action (open/close) and modal type
+## Metrics Sent to Datadog
 
-### Error Tracking
-- Automatic error tracking for all JavaScript errors
-- Custom error tracking for API failures
-- Error context includes the source of the error
+The following metrics are sent with each weather data update:
 
-## Custom Attributes
+| Metric Name | Description | Unit | Tags |
+|-------------|-------------|------|------|
+| `weather.temperature.fahrenheit` | Current temperature | °F | location, source, app |
+| `weather.feels_like.fahrenheit` | Feels like temperature | °F | location, source, app |
+| `weather.humidity.percent` | Relative humidity | % | location, source, app |
+| `weather.wind_speed.mph` | Wind speed | MPH | location, source, app |
+| `weather.wind_direction.degrees` | Wind direction | degrees | location, source, app |
+| `weather.pressure.inhg` | Barometric pressure | inHg | location, source, app |
+| `weather.dew_point.fahrenheit` | Dew point | °F | location, source, app |
+| `weather.uv_index` | UV index | unitless | location, source, app |
+| `weather.solar_radiation.wm2` | Solar radiation | W/m² | location, source, app |
+| `weather.daily_rain.inches` | Daily rainfall | inches | location, source, app |
+| `weather.soil_moisture.percent` | Soil moisture | % | location, source, app |
+| `weather.soil_temperature.fahrenheit` | Soil temperature | °F | location, source, app |
 
-The following custom attributes are set to provide additional context:
+### Tags Included
 
-- `version` - Application version (1.0.0)
-- `data_source` - Whether data is from API or mock
-- `chart_type` - Type of chart being viewed
-- `metric` - Specific weather metric being displayed
-- `modal_type` - Type of modal being interacted with
+All metrics include the following tags:
+- `location:[station_name]` - Your weather station name
+- `source:ambient_weather` - Data source identifier
+- `app:weather_dashboard` - Application identifier
+- `lat:[latitude]` - Station latitude (if available)
+- `lon:[longitude]` - Station longitude (if available)
 
-## Performance Monitoring
+## Data Frequency
 
-Datadog automatically tracks:
-- Page load times
-- Resource loading performance
-- User interactions and their timing
-- Session replay for debugging user issues
+Metrics are sent at the same frequency as your weather data refresh interval:
+- **1 minute** - Every minute
+- **5 minutes** - Every 5 minutes (default)
+- **10 minutes** - Every 10 minutes
+- **30 minutes** - Every 30 minutes
+- **1 hour** - Every hour
 
-## Privacy
+## Visual Indicators
 
-The configuration uses `mask-user-input` as the default privacy level, which means:
-- User input fields are automatically masked
-- Sensitive data like API keys are not captured
-- Session replays respect user privacy
+### When Enabled:
+- **Header**: Small green badge showing "Datadog: X min"
+- **Main Area**: Green banner with "Datadog Metrics Active" and last send time
+- **Settings Modal**: Status indicator showing current state
 
-## Usage
+### When Disabled:
+- No visual indicators shown
+- Settings modal shows "Settings configured but metrics are disabled"
 
-The Datadog utility functions are available in `src/utils/datadog.ts`:
+## Troubleshooting
 
-```typescript
-import { datadog } from '../utils/datadog';
+### Common Issues
 
-// Track custom actions
-datadog.addAction('custom_event', { key: 'value' });
+1. **"Failed to send metrics to Datadog" error**
+   - Check your API and Application keys are correct
+   - Verify your Datadog account is active
+   - Check network connectivity
 
-// Track errors
-datadog.addError(new Error('Something went wrong'));
+2. **No metrics appearing in Datadog**
+   - Wait 5-10 minutes for metrics to appear (Datadog has processing delays)
+   - Check the browser console for error messages
+   - Verify the integration is enabled in settings
 
-// Track API calls
-datadog.trackApiCall(url, method, status, duration);
+3. **Metrics stop sending**
+   - Refresh the page to restart the integration
+   - Check if the app has been running for a long time
+   - Verify your Datadog keys haven't expired
 
-// Track user interactions
-datadog.trackUserInteraction('button_click', 'refresh_button');
-```
+### Debug Information
 
-## Viewing Data
+Open your browser's developer console (F12) to see:
+- Successful metric sends: "Successfully sent X metrics to Datadog"
+- Error messages: "Failed to send metrics to Datadog: [error]"
+- Integration status: "Weather metrics sent to Datadog successfully"
 
-All tracked events and metrics can be viewed in your Datadog dashboard at:
-https://app.datadoghq.com/rum/explorer
+## Privacy & Security
 
-The data will appear under the service name `ambient-weather-dashboard` in the `prod` environment.
+- **API Keys**: Stored locally in your browser's localStorage
+- **Data**: Only sent while the app is running and enabled
+- **Location**: Your weather station location is included as tags
+- **Frequency**: Data is sent at your configured refresh interval
 
-## Historical Data Management
+## Datadog Dashboard Setup
 
-The application automatically manages historical data to prevent duplicates:
+Once metrics are flowing, you can create custom dashboards in Datadog:
 
-- **Polling Frequency**: Data is fetched every 5 minutes (300,000ms) by default
-- **Duplicate Prevention**: Historical data is only stored if at least 5 minutes have passed since the last data point
-- **Automatic Cleanup**: Existing duplicate entries are automatically cleaned up on app initialization
-- **Storage Limit**: Maximum of 288 data points (24 hours worth of 5-minute intervals)
+1. Go to **Dashboards** → **New Dashboard**
+2. Add widgets for your weather metrics
+3. Use tags to filter by location: `location:your_station_name`
+4. Set up alerts for extreme weather conditions
+5. Create timeboards for historical analysis
 
-This ensures that charts and modals display clean, non-duplicate historical data. 
+## Support
+
+If you encounter issues:
+1. Check the browser console for error messages
+2. Verify your Datadog account and API keys
+3. Try disabling and re-enabling the integration
+4. Refresh the page to restart the service 

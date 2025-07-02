@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { X, Key, RefreshCw, Grid3X3 } from 'lucide-react';
+import { X, Key, RefreshCw, Grid3X3, Database } from 'lucide-react';
 import { resetCardOrder } from '../utils/cardOrder';
 import { datadog } from '../utils/datadog';
 
@@ -10,6 +10,7 @@ interface WeatherSettingsProps {
   refreshInterval: number;
   onRefreshIntervalChange: (interval: number) => void;
   onApiKeyChange: () => void;
+  onDatadogSettingsChange: () => void;
 }
 
 const WeatherSettings: React.FC<WeatherSettingsProps> = ({
@@ -17,7 +18,8 @@ const WeatherSettings: React.FC<WeatherSettingsProps> = ({
   onClose,
   refreshInterval,
   onRefreshIntervalChange,
-  onApiKeyChange
+  onApiKeyChange,
+  onDatadogSettingsChange
 }) => {
   if (!isOpen) return null;
 
@@ -71,6 +73,22 @@ const WeatherSettings: React.FC<WeatherSettingsProps> = ({
               className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-lg font-semibold transition-all"
             >
               Update API Keys
+            </button>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-3">
+              <Database className="w-4 h-4 inline mr-2" />
+              Datadog Integration
+            </label>
+            <button
+              onClick={() => {
+                onDatadogSettingsChange();
+                datadog.trackUserInteraction('datadog_settings_opened', 'weather_settings');
+              }}
+              className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white rounded-lg font-semibold transition-all"
+            >
+              Configure Datadog Metrics
             </button>
           </div>
 

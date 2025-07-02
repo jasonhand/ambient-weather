@@ -8,14 +8,18 @@ import WeatherStats from '../components/WeatherStats';
 import WeatherCharts from '../components/WeatherCharts';
 import WeatherSettings from '../components/WeatherSettings';
 import ApiKeyModal from '../components/ApiKeyModal';
+import DatadogSettingsModal from '../components/DatadogSettingsModal';
 import { useWeatherData } from '../hooks/useWeatherData';
-import { getStoredApiKey } from '../utils/storage';
+import { getStoredApiKey, getStoredDatadogSettings, DatadogSettings } from '../utils/storage';
+import { initializeDatadogMetrics, destroyDatadogMetrics, getDatadogMetricsService } from '../utils/datadogMetrics';
 
 const Index = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showApiModal, setShowApiModal] = useState(false);
+  const [showDatadogModal, setShowDatadogModal] = useState(false);
   const [apiKey, setApiKey] = useState<string>('');
   const [refreshInterval, setRefreshInterval] = useState(300000); // 5 minutes
+  const [datadogEnabled, setDatadogEnabled] = useState(false);
   
   const { data: weatherData, loading, error, refetch } = useWeatherData(apiKey, refreshInterval);
 
@@ -27,13 +31,39 @@ const Index = () => {
       setShowApiModal(true);
     }
     
+    // Initialize Datadog metrics if settings exist
+    const datadogSettings = getStoredDatadogSettings();
+    if (datadogSettings && datadogSettings.enabled) {
+      initializeDatadogMetrics(
+        datadogSettings.apiKey,
+        datadogSettings.appKey,
+        datadogSettings.host
+      );
+      setDatadogEnabled(true);
+    }
+    
     // Track page view
     datadog.addAction('page_view', { page: 'index' });
+
+    // Cleanup function to destroy Datadog metrics service
+    return () => {
+      destroyDatadogMetrics();
+    };
   }, []);
 
   const handleApiKeySubmit = (key: string) => {
     setApiKey(key);
     setShowApiModal(false);
+  };
+
+  const handleDatadogSettingsChange = (settings: DatadogSettings) => {
+    if (settings.enabled) {
+      initializeDatadogMetrics(settings.apiKey, settings.appKey, settings.host);
+      setDatadogEnabled(true);
+    } else {
+      destroyDatadogMetrics();
+      setDatadogEnabled(false);
+    }
   };
 
   return (
@@ -54,6 +84,8 @@ const Index = () => {
             lastUpdated={weatherData?.lastUpdated}
             location={weatherData?.location}
             isRealData={weatherData?.isRealData}
+            datadogEnabled={datadogEnabled}
+            refreshInterval={refreshInterval}
           />
           
           {weatherData && (
@@ -116,6 +148,13 @@ const Index = () => {
         refreshInterval={refreshInterval}
         onRefreshIntervalChange={setRefreshInterval}
         onApiKeyChange={() => setShowApiModal(true)}
+        onDatadogSettingsChange={() => setShowDatadogModal(true)}
+      />
+
+      <DatadogSettingsModal
+        isOpen={showDatadogModal}
+        onClose={() => setShowDatadogModal(false)}
+        onSettingsChange={handleDatadogSettingsChange}
       />
     </div>
   );

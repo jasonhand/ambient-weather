@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { storeHistoricalData, HistoricalDataPoint, cleanupHistoricalData } from '../utils/storage';
 import { datadog } from '../utils/datadog';
+import { getDatadogMetricsService } from '../utils/datadogMetrics';
 
 interface WeatherData {
   temperature: number;
@@ -170,6 +171,18 @@ export const useWeatherData = (combinedApiKey: string, refreshInterval: number) 
       
       // Track successful weather data update
       datadog.trackWeatherUpdate('api', true);
+      
+      // Send metrics to Datadog if enabled
+      const datadogService = getDatadogMetricsService();
+      if (datadogService && datadogService.isEnabled()) {
+        try {
+          await datadogService.sendWeatherMetrics(weatherData);
+          console.log('Weather metrics sent to Datadog successfully');
+        } catch (error) {
+          console.error('Failed to send metrics to Datadog:', error);
+          // Don't fail the weather data update if Datadog fails
+        }
+      }
       
       // Store this data point in historical data
       const historicalPoint: HistoricalDataPoint = {

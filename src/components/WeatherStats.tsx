@@ -3,7 +3,8 @@ import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautif
 import { getHistoricalData, HistoricalDataPoint } from '../utils/storage';
 import { getCardOrder, saveCardOrder, CardConfig } from '../utils/cardOrder';
 import { datadog } from '../utils/datadog';
-import { Thermometer, Droplet, Wind, Gauge, Sun, Eye, Leaf, GripVertical } from 'lucide-react';
+import { Thermometer, Droplet, Wind, Gauge, Sun, Eye, Leaf, GripVertical, Database } from 'lucide-react';
+import { getDatadogMetricsService } from '../utils/datadogMetrics';
 import WeatherCard from './WeatherCard';
 import WeatherDetailModal from './WeatherDetailModal';
 
@@ -56,6 +57,8 @@ const WeatherStats: React.FC<WeatherStatsProps> = ({ data, loading }) => {
   const [modalData, setModalData] = useState<ModalData | null>(null);
   const [historicalData, setHistoricalData] = useState<HistoricalDataPoint[]>([]);
   const [cardOrder, setCardOrder] = useState<CardConfig[]>([]);
+  const [datadogEnabled, setDatadogEnabled] = useState(false);
+  const [lastSendTime, setLastSendTime] = useState<number>(0);
 
   useEffect(() => {
     // Load historical data from local storage
@@ -65,6 +68,11 @@ const WeatherStats: React.FC<WeatherStatsProps> = ({ data, loading }) => {
     // Load card order from local storage
     const order = getCardOrder();
     setCardOrder(order);
+
+    // Check if Datadog metrics are enabled
+    const datadogService = getDatadogMetricsService();
+    setDatadogEnabled(datadogService?.isEnabled() || false);
+    setLastSendTime(datadogService?.getLastSendTime() || 0);
   }, [data]); // Reload when new data comes in
 
   const getWindDirection = (degrees: number) => {
@@ -310,6 +318,33 @@ const WeatherStats: React.FC<WeatherStatsProps> = ({ data, loading }) => {
 
   return (
     <>
+      {datadogEnabled && (
+        <div className="mb-6 p-4 bg-gradient-to-r from-green-500/20 to-blue-500/20 backdrop-blur-sm border border-green-500/30 rounded-2xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-green-500/20 rounded-lg">
+                <Database className="w-5 h-5 text-green-400" />
+              </div>
+              <div>
+                <h3 className="text-white font-semibold">Datadog Metrics Active</h3>
+                <p className="text-green-200 text-sm">
+                  Weather data is being sent to Datadog for monitoring and visualization
+                  {lastSendTime > 0 && (
+                    <span className="block text-xs text-green-300 mt-1">
+                      Last sent: {new Date(lastSendTime).toLocaleTimeString()}
+                    </span>
+                  )}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2 text-green-300 text-sm">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span>Live</span>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="weather-cards" direction="horizontal">
           {(provided) => (

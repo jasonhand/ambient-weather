@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Settings, RefreshCw, Cloud, MapPin, AlertTriangle } from 'lucide-react';
+import { Settings, RefreshCw, Cloud, MapPin, AlertTriangle, Database } from 'lucide-react';
 
 interface WeatherHeaderProps {
   onSettingsClick: () => void;
@@ -15,6 +15,8 @@ interface WeatherHeaderProps {
     };
   };
   isRealData?: boolean;
+  datadogEnabled?: boolean;
+  refreshInterval?: number;
 }
 
 const WeatherHeader: React.FC<WeatherHeaderProps> = ({
@@ -23,7 +25,9 @@ const WeatherHeader: React.FC<WeatherHeaderProps> = ({
   loading,
   lastUpdated,
   location,
-  isRealData = false
+  isRealData = false,
+  datadogEnabled = false,
+  refreshInterval = 300000
 }) => {
   const formatLastUpdated = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
@@ -31,6 +35,15 @@ const WeatherHeader: React.FC<WeatherHeaderProps> = ({
       minute: '2-digit',
       second: '2-digit'
     }).format(date);
+  };
+
+  const formatRefreshInterval = (interval: number) => {
+    const minutes = Math.floor(interval / 60000);
+    if (minutes < 60) {
+      return `${minutes} min`;
+    }
+    const hours = Math.floor(minutes / 60);
+    return `${hours}h`;
   };
 
   return (
@@ -63,6 +76,12 @@ const WeatherHeader: React.FC<WeatherHeaderProps> = ({
                 <div className="flex items-center space-x-1 text-orange-400 text-xs">
                   <AlertTriangle className="w-3 h-3" />
                   <span>MOCK DATA - Not using real AWN API</span>
+                </div>
+              )}
+              {datadogEnabled && (
+                <div className="flex items-center space-x-1 text-green-400 text-xs bg-green-500/10 px-2 py-1 rounded-full border border-green-500/20">
+                  <Database className="w-3 h-3" />
+                  <span>Datadog: {formatRefreshInterval(refreshInterval)}</span>
                 </div>
               )}
             </div>
