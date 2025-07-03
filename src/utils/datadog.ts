@@ -1,49 +1,51 @@
+import { datadogRum } from '@datadog/browser-rum';
+
 // Datadog RUM utility functions
 export const datadog = {
   // Check if Datadog RUM is available
   isAvailable: (): boolean => {
-    return typeof window !== 'undefined' && window.DD_RUM !== undefined;
+    return typeof window !== 'undefined' && datadogRum !== undefined;
   },
 
   // Add a custom action
   addAction: (name: string, attributes?: Record<string, unknown>): void => {
     if (datadog.isAvailable()) {
-      window.DD_RUM.addAction(name, attributes);
+      datadogRum.addAction(name, attributes);
     }
   },
 
   // Add an error
   addError: (error: Error, attributes?: Record<string, unknown>): void => {
     if (datadog.isAvailable()) {
-      window.DD_RUM.addError(error, attributes);
+      datadogRum.addError(error, attributes);
     }
   },
 
   // Add custom timing
   addTiming: (name: string, time?: number): void => {
     if (datadog.isAvailable()) {
-      window.DD_RUM.addTiming(name, time);
+      datadogRum.addTiming(name, time);
     }
   },
 
   // Set user information
   setUser: (user: { id?: string; name?: string; email?: string; [key: string]: unknown }): void => {
     if (datadog.isAvailable()) {
-      window.DD_RUM.setUser(user);
+      datadogRum.setUser(user);
     }
   },
 
   // Set custom attribute
   setAttribute: (key: string, value: unknown): void => {
     if (datadog.isAvailable()) {
-      window.DD_RUM.setAttribute(key, value);
+      datadogRum.setAttribute(key, value);
     }
   },
 
   // Remove custom attribute
   removeAttribute: (key: string): void => {
     if (datadog.isAvailable()) {
-      window.DD_RUM.removeAttribute(key);
+      datadogRum.removeAttribute(key);
     }
   },
 
